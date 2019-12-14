@@ -13,6 +13,5 @@ args = Namespace(
   test_tsv=path/'test.tsv',
   test2_tsv=path/'test_stg2.tsv',
   modeldir=workdir/'models',
-  vectordir=workdir/'vectordir',
   figdir=workdir/'figures',
 )
