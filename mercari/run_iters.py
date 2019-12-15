@@ -141,7 +141,7 @@ if __name__=='__main__':
     print(np.round(np.sqrt(mean_squared_error(y_valid, y_pred)), 3))
 
   for i, clf in enumerate(clfs):
-    pickle.dump(clf, open(args.modeldir/f'clf_seed_{start_seed + i}.pkl', 'wb'))
+    pickle.dump(clf, open(args.modeldir/f'{subset}_clf_seed_{start_seed + i}.pkl', 'wb'))
 
   with open(args.workdir/f'{subset}_preds.pkl', 'wb') as f:
     pickle.dump(targs, f)
