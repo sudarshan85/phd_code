@@ -15,6 +15,7 @@ import numpy as np
 import scipy
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import mean_squared_error
 import lightgbm as lgb
 
 from utils.data_utils import set_two_splits
@@ -66,9 +67,11 @@ def process_str(train_df, valid_df):
 
   return x_train, x_valid
 
-def process_ustr(train_df, valid_df):
-  x_train = vectorizer.fit_transform(train_df['text'].values.astype('U'))
-  x_valid = vectorizer.transform(valid_df['text'].values.astype('U'))
+def process_ustr(seed):
+  with open(args.vectordir/f'bigram_{seed}.pkl', 'rb') as f:
+    vectorizer = pickle.load(f)
+    x_train = pickle.load(f)
+    x_valid = pickle.load(f)
 
   return x_train, x_valid
 
@@ -92,10 +95,11 @@ if __name__=='__main__':
     'num_threads': 32,
     'max_bin': 32,
     'objective': 'regression',
+    'verbose': -1
   }
 
   clfs, targs, preds = [], [], []
-  start_seed, n_iters = 127, 1
+  start_seed, n_iters = 127, 10
   t = trange(start_seed, start_seed + n_iters, desc='Run #', leave=True)
 
   for seed in t:
@@ -108,137 +112,36 @@ if __name__=='__main__':
       x_train, x_valid = process_str(train_df, valid_df)
     elif subset == 'u':
       train_df = df.loc[df['split'] == 'train', ['text', 'price']].reset_index(drop=True)
-      valid_df = df.loc[df['split'] == 'valid', ['text, ''price']].reset_index(drop=True)
-      x_train, x_valid = process_ustr(train_df, valid_df)
+      valid_df = df.loc[df['split'] == 'valid', ['text', 'price']].reset_index(drop=True)
+      x_train, x_valid = process_ustr(seed)
     elif subset == 'u+s':
       train_df = df.loc[df['split'] == 'train'].reset_index(drop=True)
       valid_df = df.loc[df['split'] == 'valid'].reset_index(drop=True)
       x_str_train, x_str_valid = process_str(train_df, valid_df)
-      x_ustr_train, x_ustr_valid = process_ustr(train_df, valid_df)
+      x_ustr_train, x_ustr_valid = process_ustr(seed)
 
       x_train = scipy.sparse.hstack((x_str_train, x_ustr_train)).tocsr()
       x_valid = scipy.sparse.hstack((x_str_valid, x_ustr_valid)).tocsr()
+    else:
+      print(f"Unknown subset {subset}")
+      sys.exit(1)
 
     y_train, y_valid = train_df['price'], valid_df['price']
-    print(x_train.shape, x_valid.shape, y_train.shape, y_valid.shape)
+    targs.append(y_valid)
 
+    train_ds = lgb.Dataset(x_train, y_train)
+    valid_ds = lgb.Dataset(x_valid, y_valid, reference=train_ds)
 
-    # with open(args.workdir/f'full_common/vectordir/{vec_prefix}_{seed}.pkl', 'rb') as f:
-    #   vectorizer = pickle.load(f)
-    #   x_note_train = pickle.load(f)
-    #   x_note_test = pickle.load(f)
+    gbm = lgb.train(clf_params, train_ds, num_boost_round=600, valid_sets=[train_ds, valid_ds], early_stopping_rounds=10, verbose_eval=True)
+    clfs.append(gbm)
 
-    # y_train, y_test = train_df['imi_adm_label'], test_df['imi_adm_label']
-    # targs.append(y_test)
+    y_pred = gbm.predict(x_valid)
+    preds.append(y_pred)
+    print(np.round(np.sqrt(mean_squared_error(y_valid, y_pred)), 3))
 
-    # x_str_train, x_str_test = train_df[args.str_cols].values, test_df[args.str_cols].values
-    # x_train = scipy.sparse.hstack((x_str_train, x_note_train)).tocsr()
-    # x_test = scipy.sparse.hstack((x_str_test, x_note_test)).tocsr()
+  for i, clf in enumerate(clfs):
+    pickle.dump(clf, open(args.modeldir/f'clf_seed_{start_seed + i}.pkl', 'wb'))
 
-    # clf = clf_model(**clf_params)
-    # clf.fit(x_train, y_train)
-    # clfs.append(clf)
-
-    # prob = clf.predict_proba(x_test)
-    # probs.append(prob)
-
-    # y_pred = (prob[:, 1] > threshold).astype(np.int64)
-    # preds.append(y_pred)
-
-      
-
-  # model_name = sys.argv[1]
-  # cohort = sys.argv[2]
-
-  # if model_name == 'lr':
-  #   args = lr_args
-  #   clf_model = LogisticRegression
-  #   clf_params = {
-  #     'class_weight': 'balanced',
-  #   }
-  # elif model_name == 'rf':
-  #   args = rf_args
-  #   clf_model = RandomForestClassifier
-  #   clf_params = {
-  #     'n_estimators': 400,
-  #     'min_samples_leaf': 3,
-  #     'oob_score': True,
-  #     'class_weight': 'balanced',
-  #     'n_jobs': -1,
-  #   }
-  # elif model_name == 'gbm':
-  #   args = gbm_args
-  #   clf_model = lgb.LGBMClassifier
-  #   clf_params = {
-  #       'objective': 'binary',
-  #     'metric': 'binary_logloss',
-  #     'is_unbalance': True,
-  #     'learning_rate': 0.05,
-  #     'max_bin': 16,
-  #     'colsample_bytree': 0.5,
-  #   }
-  # else:
-  #   print("Allowed models: (lr|rf|gbm)")
-  #   sys.exit(1)
-
-  # if cohort == 'vital':
-  #   threshold = args.full_common_vital_threshold
-  #   vec_prefix = 'bi_gram_vital'
-  # elif cohort == 'all':
-  #   threshold = args.full_common_all_threshold
-  #   vec_prefix = 'bi_gram_all'
-  # else:
-  #   print("Allowed cohort: (vital|all)")
-  #   sys.exit(1)
-
-
-  # args.str_cols = pickle.load(open(f'data/str_{cohort}_cols.pkl', 'rb'))
-  # args.cols=['hadm_id'] + args.str_cols + ['note', 'imi_adm_label']
-
-  # data_df = pd.read_csv(f'data/full_common_{cohort}.csv', usecols=args.cols)
-  # data_df = data_df[data_df['imi_adm_label'] != -1].reset_index(drop=True)
-
-  # clfs, targs, preds, probs = [], [], [], []
-  # start_seed, n_iters = 127, 100
-  # t = trange(start_seed, start_seed + n_iters, desc='Run #', leave=True)
-  # # seeds = list(range(start_seed, start_seed + n_iters))
-
-  # args.workdir = Path('data/workdir')
-  # args.modeldir = args.workdir/f'full_common/{model_name}/models'
-
-  # for seed in t:
-  #   t.set_description(f"Run # (seed {seed})")
-  #   df = set_group_splits(data_df.copy(), group_col='hadm_id', seed=seed, pct=0.15)
-  #   train_df = df[df['split'] == 'train']
-  #   test_df = df[df['split'] == 'test']
-
-  #   with open(args.workdir/f'full_common/vectordir/{vec_prefix}_{seed}.pkl', 'rb') as f:
-  #     vectorizer = pickle.load(f)
-  #     x_note_train = pickle.load(f)
-  #     x_note_test = pickle.load(f)
-
-  #   y_train, y_test = train_df['imi_adm_label'], test_df['imi_adm_label']
-  #   targs.append(y_test)
-
-  #   x_str_train, x_str_test = train_df[args.str_cols].values, test_df[args.str_cols].values
-  #   x_train = scipy.sparse.hstack((x_str_train, x_note_train)).tocsr()
-  #   x_test = scipy.sparse.hstack((x_str_test, x_note_test)).tocsr()
-
-  #   clf = clf_model(**clf_params)
-  #   clf.fit(x_train, y_train)
-  #   clfs.append(clf)
-
-  #   prob = clf.predict_proba(x_test)
-  #   probs.append(prob)
-
-  #   y_pred = (prob[:, 1] > threshold).astype(np.int64)
-  #   preds.append(y_pred)
-
-
-  # for i, clf in enumerate(clfs):
-  #   pickle.dump(clf, open(args.modeldir/f'full_common_{cohort}_seed_{start_seed + i}.pkl', 'wb'))
-
-  # with open(args.workdir/f'full_common/{model_name}/full_common_{cohort}_preds.pkl', 'wb') as f:
-  #   pickle.dump(targs, f)
-  #   pickle.dump(probs, f)
-  #   pickle.dump(preds, f)
+  with open(args.workdir/f'{subset}_preds.pkl', 'wb') as f:
+    pickle.dump(targs, f)
+    pickle.dump(preds, f)
