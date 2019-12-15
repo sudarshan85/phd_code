@@ -60,10 +60,10 @@ def process_str(train_df, valid_df):
   train_df.loc[:, 'subcat2_val'] = train_subcat2s['id'].values/len(subcat2_names)
 
   valid_subcat2s = subcat2s.loc[valid_df['sub_cat2']]
-  valid_df.loc[:, 'subcat2_val'] = valid_subcat2s['id'].values/len(subcat2_names)  
+  valid_df.loc[:, 'subcat2_val'] = valid_subcat2s['id'].values/len(subcat2_names)
 
   x_train = train_df[['item_condition_id', 'shipping', 'brand_val', 'maincat_val', 'subcat1_val', 'subcat2_val']].values
-  x_valid = valid_df[['item_condition_id', 'shipping', 'brand_val', 'maincat_val', 'subcat1_val', 'subcat2_val']].values  
+  x_valid = valid_df[['item_condition_id', 'shipping', 'brand_val', 'maincat_val', 'subcat1_val', 'subcat2_val']].values
 
   return x_train, x_valid
 
@@ -132,7 +132,8 @@ if __name__=='__main__':
     train_ds = lgb.Dataset(x_train, y_train)
     valid_ds = lgb.Dataset(x_valid, y_valid, reference=train_ds)
 
-    gbm = lgb.train(clf_params, train_ds, num_boost_round=600, valid_sets=[train_ds, valid_ds], early_stopping_rounds=10, verbose_eval=True)
+    gbm = lgb.train(clf_params, train_ds, num_boost_round=600, valid_sets=[train_ds, valid_ds],
+        early_stopping_rounds=10, verbose_eval=False)
     clfs.append(gbm)
 
     y_pred = gbm.predict(x_valid)
