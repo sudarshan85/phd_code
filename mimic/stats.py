@@ -24,7 +24,7 @@ if __name__=='__main__':
   var_cols = vitals_common.columns[2:]
   dfs = []
 
-  # hadms = [153664, 144438, 168047, 119617, 110684]
+  # hadms = [134899, 137495, 161246, 171847, 187987]
   # subset_df = vitals_common.loc[(vitals_common['hadm_id'].isin(hadms))].reset_index(drop=True)
   # for hadm_id, group_df in tqdm(subset_df.groupby('hadm_id'), desc='Encounters'):
   for hadm_id, group_df in tqdm(vitals_common.groupby('hadm_id'), desc='Encounters'):
@@ -64,4 +64,4 @@ if __name__=='__main__':
   cols = ['hadm_id', 'charttime'] + list(vitals_common_stats.columns[2:])
   vitals_common_stats = vitals_common_stats[cols]
 
-  vitals_common_stats.to_csv(path/f'structured_vitals_stats.csv', index=False)
+  vitals_common_stats.to_csv('data/structured_vitals_stats.csv', index=False)
