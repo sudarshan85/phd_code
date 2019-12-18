@@ -10,16 +10,12 @@ workdir = path/f'workdir/lr'
 args = Namespace(
   path=path,
   workdir=workdir,
-  figdir=workdir/'figures',
-  structured_csv=path/'modelready_structured.csv',
-  unstructured_csv=path/'modelready_unstructured.csv',
-  mm_csv=path/'modelready_mm.csv',
+  figdir=path/'workdir/figures',
+  dataset_csv=path/'modelready_mm.csv',
   modeldir=workdir/'models',
   vectordir=path/'workdir/vectordir',
   str_cols_pkl=path/'str_cols.pkl',
+  structured_threshold=0.53,
+  unstructured_threshold=0.41,
+  mm_threshold=0.45,
 )
-
-# notes_common_vital_threshold=0.41,
-# full_common_vital_threshold=0.43,
-# notes_common_all_threshold=0.46,
-# full_common_all_threshold=0.5,
