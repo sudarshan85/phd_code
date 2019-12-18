@@ -15,6 +15,8 @@ args = Namespace(
   unstructured_csv=path/'modelready_unstructured.csv',
   mm_csv=path/'modelready_mm.csv',
   modeldir=workdir/'models',
+  vectordir=path/'workdir/vectordir',
+  str_cols_pkl=path/'vitals_stats_cols.pkl',
 )
 
 # notes_common_vital_threshold=0.41,
