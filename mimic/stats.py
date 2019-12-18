@@ -20,6 +20,7 @@ def change_name(col_name):
 if __name__=='__main__':
   print("Loading file")
   vitals_common = pd.read_csv('data/structured_vitals_proc.csv', parse_dates=['charttime'])
+  vitals_common.drop(['intime', 'admittime'], inplace=True, axis=1)
   running_stats = ['min', 'mean', 'median', 'std', 'max']
   var_cols = vitals_common.columns[2:]
   dfs = []
