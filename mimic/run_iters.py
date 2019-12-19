@@ -16,13 +16,13 @@ import scipy
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-# from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 # import lightgbm as lgb
 
 from utils.data_utils import set_group_splits
 
 from lr.args import args as lr_args
-# from rf.full_common_args import args as rf_args
+from rf.args import args as rf_args
 # from gbm.full_common_args import args as gbm_args
 
 if __name__=='__main__':
@@ -39,16 +39,16 @@ if __name__=='__main__':
     clf_params = {
       'class_weight': 'balanced',
     }
-  # elif model_name == 'rf':
-  #   args = rf_args
-  #   clf_model = RandomForestClassifier
-  #   clf_params = {
-  #     'n_estimators': 400,
-  #     'min_samples_leaf': 3,
-  #     'oob_score': True,
-  #     'class_weight': 'balanced',
-  #     'n_jobs': -1,
-  #   }
+  elif model_name == 'rf':
+    args = rf_args
+    clf_model = RandomForestClassifier
+    clf_params = {
+      'n_estimators': 400,
+      'min_samples_leaf': 3,
+      'oob_score': True,
+      'class_weight': 'balanced',
+      'n_jobs': -1,
+    }
   # elif model_name == 'gbm':
   #   args = gbm_args
   #   clf_model = lgb.LGBMClassifier
