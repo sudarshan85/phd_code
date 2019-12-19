@@ -85,18 +85,14 @@ if __name__=='__main__':
     print("Allowed subsets (s|u|u+s)")
     sys.exit()
 
-  print(data_df.shape)
-
-
   clfs, targs, preds, probs = [], [], [], []
   start_seed, n_iters = 127, 2
   t = trange(start_seed, start_seed + n_iters, desc='Run #', leave=True)
   seeds = list(range(start_seed, start_seed + n_iters))
 
   workdir = Path(f'data/workdir/{model_name}')
-  vectordir = workdir/'vectordir'
+  vectordir = Path('data/workdir/vectordir')
   modeldir = workdir/'models'
-  targs.append(y_test)
 
   for seed in t:
     t.set_description(f"Run # (seed {seed})")
@@ -105,17 +101,18 @@ if __name__=='__main__':
     train_df = df[df['split'] == 'train']
     test_df = df[df['split'] == 'test']
     y_train, y_test = train_df['imi_adm_label'], test_df['imi_adm_label']
+    targs.append(y_test)
 
     if subset == 's':
       x_train, x_test = train_df[str_cols].values, test_df[str_cols].values
-    elif subest == 'u':
-      with open(vectordir/'bigram_{seed}.pkl', 'rb') as f:
+    elif subset == 'u':
+      with open(vectordir/f'bigram_{seed}.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
         x_train = pickle.load(f)
         x_test = pickle.load(f)
     elif subset == 'u+s':
       x_vitals_train, x_vitals_test = train_df[str_cols].values, test_df[str_cols].values
-      with open(vectordir/'bigram_{seed}.pkl', 'rb') as f:
+      with open(vectordir/f'bigram_{seed}.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
         x_note_train = pickle.load(f)
         x_note_test = pickle.load(f)      
