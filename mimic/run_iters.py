@@ -17,13 +17,13 @@ import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-# import lightgbm as lgb
+import lightgbm as lgb
 
 from utils.data_utils import set_group_splits
 
 from lr.args import args as lr_args
 from rf.args import args as rf_args
-# from gbm.full_common_args import args as gbm_args
+from gbm.args import args as gbm_args
 
 if __name__=='__main__':
   if len(sys.argv) != 3:
@@ -49,17 +49,17 @@ if __name__=='__main__':
       'class_weight': 'balanced',
       'n_jobs': -1,
     }
-  # elif model_name == 'gbm':
-  #   args = gbm_args
-  #   clf_model = lgb.LGBMClassifier
-  #   clf_params = {
-  #       'objective': 'binary',
-  #     'metric': 'binary_logloss',
-  #     'is_unbalance': True,
-  #     'learning_rate': 0.05,
-  #     'max_bin': 16,
-  #     'colsample_bytree': 0.5,
-  #   }
+  elif model_name == 'gbm':
+    args = gbm_args
+    clf_model = lgb.LGBMClassifier
+    clf_params = {
+        'objective': 'binary',
+      'metric': 'binary_logloss',
+      'is_unbalance': True,
+      'learning_rate': 0.05,
+      'max_bin': 16,
+      'colsample_bytree': 0.5,
+    }
   else:
     print("Allowed models: (lr|rf|gbm)")
     sys.exit(1)

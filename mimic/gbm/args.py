@@ -15,7 +15,7 @@ args = Namespace(
   modeldir=workdir/'models',
   vectordir=path/'workdir/vectordir',
   str_cols_pkl=path/'str_cols.pkl',
-  structured_threshold=0.33,
-  unstructured_threshold=0.334,
-  mm_threshold=0.326,
+  structured_threshold=0.49,
+  unstructured_threshold=0.47,
+  mm_threshold=0.45,
 )
