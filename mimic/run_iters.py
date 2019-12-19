@@ -86,7 +86,7 @@ if __name__=='__main__':
     sys.exit()
 
   clfs, targs, preds, probs = [], [], [], []
-  start_seed, n_iters = 127, 2
+  start_seed, n_iters = 127, 100
   t = trange(start_seed, start_seed + n_iters, desc='Run #', leave=True)
   seeds = list(range(start_seed, start_seed + n_iters))
 
