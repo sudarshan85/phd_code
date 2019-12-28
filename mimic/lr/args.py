@@ -12,6 +12,7 @@ args = Namespace(
   workdir=workdir,
   figdir=path/'workdir/figures',
   dataset_csv=path/'modelready_mm.csv',
+  structured_csv=path/'modelready_structured.csv',
   modeldir=workdir/'models',
   vectordir=path/'workdir/vectordir',
   str_cols_pkl=path/'str_cols.pkl',
