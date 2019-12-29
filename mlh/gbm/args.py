@@ -4,14 +4,13 @@ from argparse import Namespace
 from pathlib import Path
 
 path = Path('../data')
-model_name='gbm'
-workdir = path/f'workdir'
+workdir = path/'workdir/gbm'
 
 args = Namespace(
   path=path,
   workdir=workdir,
-  model=model_name,
-  figdir=workdir/'figdir',
-  dataset_csv=path/'notes_all_proc.csv',
-  threshold=0.27,
-  )
+  figdir=path/'workdir/figures',
+  vectordir=path/'workdir/vectordir',
+  dataset_csv=path/'unstructured_proc.csv',
+  threshold=0.11,
+)

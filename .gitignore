@@ -104,3 +104,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 mercari/workspace.code-workspace
+.vscode/settings.json
